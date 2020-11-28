@@ -1,0 +1,49 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font: 1rem Helvetica, Arial; background-color: #e1e5ea;}
+button:hover { background: rgb(18, 21, 59); }
+button { cursor: pointer; }
+.btn { background-color:  rgb(37, 42, 110); color: white;}
+.btn-primary { background-color: rgb(37, 42, 110);}
+.modal-content { margin-top: 15%;}
+.modal-body > * { margin: 0.5rem;}
+.meme-wrapper { text-align: center;margin: auto;padding: 3rem;}
+#meme {width: 400px;height: auto; max-width: 90%;}
+#chat { background: rgb(53, 53, 53); padding: 3px; position: fixed; bottom: 0; width: 100%; height: 5rem;}
+#chat input { height: 3rem; margin-top: 0.75rem; background-color: white; border-radius: 3px;}
+#chat button { height: 3rem; padding: 10px}
+#messages { list-style-type: none; margin: 0; margin-bottom: 5rem; padding: 0; }
+#messages li { padding: 5px 10px; }
+#messages li:nth-child(odd) { background: #eee; }
+div.center-wrap { text-align: center; }
+.fr { float: right;}
+.form-control-plaintext {background-color: white; border: 1px solid rgb(54, 55, 59);border-radius: 3px;}
+#switch-meme {
+    cursor: pointer;
+    height: 3rem;
+    width: 10rem;
+    background: rgb(37, 42, 110);
+    border: none;
+    padding: 10px;
+    color: #eee;
+    font-weight: bold;
+    margin-left: auto;
+    margin-right: auto;
+    position: fixed;
+}
+#switch-meme:hover {
+    background: rgb(18, 21, 59);
+}
+#meme-vote {
+    max-width: 100%;
+}
+#sticky-footer {
+    flex-shrink: none;
+}
+.footer-btn{
+    margin-top: 0.75rem;
+    width: 100%;
+}
+footer input{
+    width: 96%;
+    margin-left: 4%;
+}

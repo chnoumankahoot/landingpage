@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Chatrooom</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+    </style>
+  </head>
+  <body>
+    
+    <p>Time Remaining: <span id="remainingTime"></span></p>
+    <div id="icArray"></div>
+    <form action="" id="imagecaptionform">
+      <input id="ic" autocomplete="off" /><button>Send Image Caption</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+        $(function () {
+            var socket = io();
+            $('form').submit(function(e){
+                e.preventDefault(); // prevents page reloading
+                socket.emit('imagecaption', $('#ic').val());
+                // $('#ic').val('');
+                $('#imagecaptionform').css("display", "none");
+                return false;
+            });
+          
+            
+            socket.on('imagecaption', function(msgArray){
+                // all values in one row
+                $('#icArray').append($('<p>').text(msgArray)); 
+                
+                // one attribute value per row
+                var index;
+                for (index = 0; index < msgArray.length; ++index) {
+                    console.log(msgArray[index]);
+                    $('#icArray').append($('<p>').text(msgArray[index])); 
+                } 
+                
+            });
+
+
+        });
+
+        
+        
+      </script>
+    </body>
+</html>

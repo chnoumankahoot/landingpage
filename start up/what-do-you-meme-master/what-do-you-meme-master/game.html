@@ -1,0 +1,235 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Caption This.</title>
+  <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'
+    integrity='sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T' crossorigin='anonymous'>
+    <!-- <link rel='stylesheet' href='/css/stylesHome.css'> -->
+    <link rel='stylesheet' href='/css/styles.css'>
+  <style>
+  </style>
+</head>
+
+<body>
+
+<!-- Modal Layers -->
+
+  <div class='modal' id='username-layer' tabindex='-1' role='dialog' data-backdrop='static' data-keyboard='false'>
+    <div class='modal-dialog' role='document'>
+      <div class='modal-content'>
+        <div class='modal-header'>
+          <h5 class='modal-title'>Username</h5>
+        </div>
+        <div class='modal-body'>
+          Upload your own images: <span class='text-muted'>(optional)</span>
+          <form id='image-upload' method='post' enctype='multipart/form-data' action='/game'>
+            <input type='file' name='file'>
+            <input type='submit' value='Submit'>
+          </form>
+          Enter your Name:
+          <br>
+          <form action='' id='name-submit'><input type='text' id='input-name'></form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class='modal' id='voting-layer' tabindex='-1' role='dialog'>
+    <div class='modal-dialog' role='document'>
+      <div class='modal-content'>
+        <div class='modal-header'>
+          <h5 class='modal-title'>Time To Vote!</h5>
+          <span aria-hidden='true'>&times;</span>
+          </button>
+        </div>
+        <div class='modal-body'>
+          <img src='/images/1.jpg' alt='' id='meme-vote'>
+          <p id='waitingForPlayers'>Waiting for other players ...</p>
+          <br>
+          <ul id='captions'></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- End Modal Layers -->
+
+<div class='container-fluid'>
+
+  <div>
+    <button id='switch-meme' class='btn btn-dark'>Switch Meme</button><br>
+  </div>
+  <div class='fr'>
+    <p id='current-round'>Round _ out of 10</p>
+    <ul id='active-users'>
+
+    </ul>
+  </div>
+  <div class='meme-wrapper'>
+    <img id='meme' src='/images/1.jpg' alt=''>
+  </div>
+
+  <div id='icArray'></div>
+
+  <form action='' id='imagecaptionform'>
+    <div class='form-group row'>
+      <div class='col-sm-9'>
+        <input autocomplete='off' type='text' class='form-control-plaintext' id='ic' placeholder='When you can`t think of a caption ...'>
+      </div>
+      <div class='col-sm-3'><button class='btn'>Submit Caption</button></div>
+    </div>
+  </form>
+
+  <ul id='messages'></ul>
+</div>
+
+<footer class='sticky-footer'>
+  <form action='' id='chat'>
+    <div class='form-group row'>
+      <div class='' style='width: 75%;'><input style='width: 90%;' id='m' autocomplete='off' /></div>
+      <div class='' style='width: 20%'><button class='btn btn-primary footer-btn'>Send</button></div>
+    </div>
+  </form>
+</footer>
+
+  <div class='modal' id='winner-layer' tabindex='-1' role='dialog'>
+    <div class='modal-dialog' role='document'>
+      <div class='modal-content'>
+        <div class='modal-body'>
+          <h2 id='winnername'></h2>
+          <p id='winnerscore'></p>
+          <button id='new-game'>start new game!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src='/socket.io/socket.io.js'></script>
+  <script src='https://code.jquery.com/jquery-3.3.1.slim.min.js'
+    integrity='sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo'
+    crossorigin='anonymous'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js'
+    integrity='sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1'
+    crossorigin='anonymous'></script>
+  <script src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js'
+    integrity='sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM'
+    crossorigin='anonymous'></script>
+  <script>
+    
+    var sendID;
+
+    $(function () {
+      var socket = io();
+      var room = document.location.pathname;
+
+      $(document).ready(function () {
+        socket.emit('join room', room);
+        console.log('Room: ' + room);
+      });
+      $(document).ready(function (e) {
+        $('#username-layer').modal('show');
+      });
+      $('#name-submit').submit(function (e) {
+        e.preventDefault();
+        socket.emit('enter name', $('#input-name').val(), room);
+        $('#username-layer').modal('hide');
+        return false;
+      });
+      $('#chat').submit(function (e) {
+        e.preventDefault();
+        socket.emit('chat message', $('#m').val(), room);
+        $('#m').val('');
+        return false;
+      });
+      $('#switch-meme').click(function (e) {
+        e.preventDefault();
+        socket.emit('switch meme', room);
+      });
+      $('#create-file').click(function (e) {
+        e.preventDefault();
+        socket.emit('create file');
+      });
+
+      $('#imagecaptionform').submit(function (e) {
+        e.preventDefault(); /* prevents page reloading */
+        var caption = $('#ic').val();
+        socket.emit('caption', caption, room);
+        $('#voting-layer').modal('show');
+        $('#ic').val('');
+        return false;
+      });
+
+      socket.on('new username', function (id, name) {
+        var newID = id+'name';
+        $('#active-users').append($('<li>').text(name).attr('id', newID));
+        $('#'+newID).append($('<span>').text('0'));
+      });
+      socket.on('chat message', function (msg) {
+        console.log(msg);
+        $('#messages').append($('<li>').text(msg));
+      });
+      socket.on('switch meme', function (tmp) {
+        $('#meme').attr('src', '/images/' + tmp + '.jpg');
+        $('#meme-vote').attr('src', '/images/' + tmp + '.jpg');
+        console.log(tmp);
+      });
+      socket.on('user left', function (username) {
+        $('#' + username).css('display', 'none');
+        console.log(username + ' left the game');
+      });
+
+      sendID = function (btnid, caption){
+        console.log(btnid, caption);
+        socket.emit('vote', btnid, room, caption);
+        var node= document.getElementById('captions');
+        node.querySelectorAll('*').forEach(n => n.remove());
+        $('#voting-layer').modal('hide');
+      };
+
+      socket.on('caption', function (id, caption) {
+        console.log(id+': '+caption);
+        var button_tmp = '<li><button onclick=\"sendID(this.id, this.innerHTML)\" id=\"' + id + '\" >' + caption + '</button></li>';
+        $('#captions').append($(button_tmp));
+        $('#waitingForPlayers').css('display', 'none');
+
+      });
+
+      socket.on('all voted', function(results) {
+        for (const [id, score] of Object.entries(results)) {
+          console.log(id+' got '+score+' votes.');
+          var identifier = '.'+id;
+          identifier = identifier.replace(/\s+/g, '');
+          identifier = identifier+' span';
+          $(identifier).text(score);
+        }
+      });
+
+      socket.on('update score', function(id, score){
+        console.log(id[0],score[0]);
+        for (let i = 0; i < id.length; i++) {
+          const tmp_id = id[i]+'name';
+          $('#'+tmp_id+' span').text(score[i]);
+        }
+      });
+
+     socket.on('winner', function(winner){
+         console.log('Winner: '+winner[1],winner[2]);
+      });
+
+      socket.on('show winner', function(score, username) {
+        console.log('Current Score: ' + score + 'Username: ' + username);
+        $('#winnername').text('The winner is ' + username + ' 🎉');
+        $('#winnerscore').text('('+ score + ' points)');
+        $('#winner-layer').modal('show');
+      });
+
+      socket.on('update round', function(round) {
+        console.log('current round: ' + round);
+        $('#current-round').text('Round ' + round + ' out of 10');
+      });
+    });
+  </script>
+</body>
+
+</html>
